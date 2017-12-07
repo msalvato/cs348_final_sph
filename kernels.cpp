@@ -54,7 +54,12 @@ Vec2f spikyKernelGradient (Vec2f r1, Vec2f r2, float h){
 void particleDensity(Particle* p) {
 	float density = 0;
 	for (Particle* neighbor : p->neighbors) {
-		density += mass*poly6Kernel(p->x, neighbor->x, radius);
+		//if (neighbor->hapti_particle) {
+		//	density += 10*mass*poly6Kernel(p->x, neighbor->x, radius);
+		//}
+		//else{
+			density += mass*poly6Kernel(p->x, neighbor->x, radius);
+		//}
 	}
 	p->density = density;
 }
@@ -65,7 +70,12 @@ Vec2f particlePressureForce(Particle* p) {//Vec2f r1, float rho_1, std::vector<V
 	float pressure = calcPressure(p->density);
 	for (Particle* neighbor : p->neighbors) {
 		float pressure2 = calcPressure(neighbor->density);
-		pressure_force += mass*((pressure + pressure2)/(2.0f*neighbor->density))*spikyKernelGradient(p->x, neighbor->x, radius);
+		if (neighbor->hapti_particle) {
+			pressure_force += 10*mass*((pressure + pressure2)/(2.0f*neighbor->density))*spikyKernelGradient(p->x, neighbor->x, radius);
+		}
+		else{
+			pressure_force += mass*((pressure + pressure2)/(2.0f*neighbor->density))*spikyKernelGradient(p->x, neighbor->x, radius);
+		}
 	}
 	//pressure_force *= -1.0/(p_1);
 	pressure_force *= -1.0f;
@@ -77,7 +87,12 @@ Vec2f particleViscosityForce(Particle* p) {//Vec2f r1, float rho_1, Vec2f v_1,  
 	// all particles are unit mass kthx
 	Vec2f viscosity_force = Vec2f(0,0);
 	for (Particle* neighbor : p->neighbors) {
-		viscosity_force += mass*((neighbor->u - p->u)/(neighbor->density))*viscosityKernelLaplacian(p->x, neighbor->x, radius);
+		if (neighbor->hapti_particle) {
+			viscosity_force += 10*mass*((neighbor->u - p->u)/(neighbor->density))*viscosityKernelLaplacian(p->x, neighbor->x, radius);
+		}
+		else {
+			viscosity_force += mass*((neighbor->u - p->u)/(neighbor->density))*viscosityKernelLaplacian(p->x, neighbor->x, radius);
+		}	
 
 	}
 	viscosity_force *= viscosity;

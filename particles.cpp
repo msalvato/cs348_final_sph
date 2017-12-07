@@ -24,16 +24,18 @@ Particles::Particles(float width, float height, int resolution, int x_particles,
 
    for (int i = 0; i < y_particles; i ++ ){
       for (int j = 0; j < x_particles*1.5; j++){
-         add_particle(Vec2f(start_x + space_x*j, start_y + space_y*i), Vec2f(0,0));
+         add_particle(Vec2f(start_x + space_x*j, start_y + space_y*i), Vec2f(0,0), false);
       }
    }
-   hapti_particle = new Particle(Vec2f(-1,-1), Vec2f(0,0), false);
+   add_particle(Vec2f(-1,-1), Vec2f(0,0), true);
+   hapti_particle = particles.back();
+
 }
 
 void Particles::
-add_particle(const Vec2f &px, const Vec2f &pu)
+add_particle(const Vec2f &px, const Vec2f &pu, bool hapti_particle)
 {
-   particles.push_back(new Particle(px,pu,0));
+   particles.push_back(new Particle(px,pu,hapti_particle));
    np++;
 }
 
@@ -58,7 +60,7 @@ update_sph(float dt) {
    }
    //#pragma omp parallel for
    //for (Particle* p : particles){
-   for (int i = 0; i < particles.size(); i++){
+   for (int i = 0; i < particles.size()-1; i++){
       Particle* p = particles[i];
       p->u += p->force*dt/p->density;
       p->x += p->u*dt;

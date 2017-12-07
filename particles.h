@@ -27,7 +27,7 @@ struct Particles{
 
    Particles(float width, float height, int resolution, int x_particles, int y_particles);
 
-   void add_particle(const Vec2f &px, const Vec2f &pu);
+   void add_particle(const Vec2f &px, const Vec2f &pu, const bool hapti_particle);
    void write_to_file(const char *filename_format, ...);
    void update_sph(float dt);
 

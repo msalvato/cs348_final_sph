@@ -40,7 +40,7 @@ void advance_one_frame(Particles &particles, double frametime)
          finished=true;
       }else if(t+1.5*dt>=frametime)
          dt=0.5*(frametime-t);
-      printf("advancing %g (to %f%% of frame)\n", dt, 100.0*(t+dt)/frametime);
+      //printf("advancing %g (to %f%% of frame)\n", dt, 100.0*(t+dt)/frametime);
       advance_one_step(particles, dt);
       t+=dt;
    }

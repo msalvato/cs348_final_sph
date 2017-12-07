@@ -22,6 +22,7 @@ std::string outputpath;
 double frametime = .0001;
 int stepCount;
 bool start;
+bool mouse_down = false;
 
 
 void set_view(float &bottom, float &left, float &height)
@@ -30,7 +31,7 @@ void set_view(float &bottom, float &left, float &height)
    left=0;
    float top=bottom, right=left;
    right = 1;
-   top = 1.5;
+   top = 1;
    if(right-left > top-bottom)
       height=1.5*(right-left);
    else
@@ -49,7 +50,7 @@ void display(void)
    glBegin(GL_POINTS);
    
    if( pParticles )
-      for(unsigned int i=0; i<pParticles->particles.size(); ++i) {
+      for(unsigned int i=0; i<pParticles->particles.size()-1; ++i) {
          glVertex2fv(pParticles->particles[i]->x.v);
       }
       for (int i = 0; i < 1000; i++) {
@@ -59,6 +60,13 @@ void display(void)
          glVertex2fv(Vec2f(3, 1.5*i/1000.0).v);
       }
    glEnd();
+   glPointSize(25);
+   glBegin(GL_POINTS);
+   if (pParticles) {
+      glVertex2fv(pParticles->hapti_particle->x.v);
+   }
+   glEnd();
+
 }
 
 struct ScreenShotButton : public Gluvi::Button{
@@ -100,11 +108,31 @@ void display_data() {
 void timer_func(int value) {
    advance_one_frame(*pParticles, .0001);
    ++stepCount;
-   printf("===================================================> step %d...\n", stepCount);
-   pParticles->write_to_file("%s/frameparticles%04d", outputpath.c_str(), stepCount);
-   sprintf(frame_number, "frame %d", stepCount);
+   //printf("===================================================> step %d...\n", stepCount);
+   //pParticles->write_to_file("%s/frameparticles%04d", outputpath.c_str(), stepCount);
+   //sprintf(frame_number, "frame %d", stepCount);
    glutPostRedisplay();
    glutTimerFunc(1,timer_func,1);
+}
+
+void mouse_check(int button, int state, int x, int y){
+   if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN)) {
+      mouse_down = true;
+      pParticles->hapti_particle->x[0] = x/600.f;
+      pParticles->hapti_particle->x[1] = 1.5-y/600.f;
+   }
+   if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP)) {
+      mouse_down = false;
+      pParticles->hapti_particle->x[0] = -1;
+      pParticles->hapti_particle->x[1] = -1;
+   }
+}
+
+void motion_check(int x, int y){
+   pParticles->hapti_particle->u[0] = 10000*(x/600.f - pParticles->hapti_particle->x[0]);
+   pParticles->hapti_particle->u[1] = 10000*(1.5-y/600.f - pParticles->hapti_particle->x[1]);
+   pParticles->hapti_particle->x[0] = x/600.f;
+   pParticles->hapti_particle->x[1] = 1.5-y/600.f;
 }
 
 int main(int argc, char **argv)
@@ -126,11 +154,14 @@ int main(int argc, char **argv)
    //glutKeyboardFunc(key_handler);
    glutKeyboardFunc(key_handler);
    glutTimerFunc(1,timer_func,1);
+   glutMouseFunc(mouse_check);
+   glutMotionFunc(motion_check);
    //glutDisplayFunc(display_data);
    float bottom, left, height;
    set_view(bottom, left, height);
-   
-   Gluvi::PanZoom2D cam(bottom, left, height);
+   std::cout << left << std::endl;
+
+   Gluvi::PanZoom2D cam(0,0,1.5);
    Gluvi::camera=&cam;
    
    Gluvi::userDisplayFunc=display;
