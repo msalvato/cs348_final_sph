@@ -21,7 +21,7 @@ Particles* pParticles;
 std::string outputpath;
 double frametime = .0001;
 int stepCount;
-
+bool start;
 
 
 void set_view(float &bottom, float &left, float &height)
@@ -29,7 +29,7 @@ void set_view(float &bottom, float &left, float &height)
    bottom=0;
    left=0;
    float top=bottom, right=left;
-   right = 3;
+   right = 1;
    top = 1.5;
    if(right-left > top-bottom)
       height=1.5*(right-left);
@@ -45,8 +45,9 @@ void display(void)
 {
    glDisable(GL_LIGHTING);
    glColor3f(1, 1, 1);
+   glPointSize(3);
    glBegin(GL_POINTS);
-   glPointSize(100);
+   
    if( pParticles )
       for(unsigned int i=0; i<pParticles->particles.size(); ++i) {
          glVertex2fv(pParticles->particles[i]->x.v);
@@ -73,6 +74,7 @@ void key_handler(unsigned char key, int x, int y)
       return;
    switch(key){
       case ' ':
+         start = !start;
          advance_one_frame(*pParticles, .0001);
          ++stepCount;
          printf("===================================================> step %d...\n", stepCount);
@@ -80,15 +82,13 @@ void key_handler(unsigned char key, int x, int y)
          sprintf(frame_number, "frame %d", stepCount);
          glutPostRedisplay();
          break;
+
       default:
          ;
    }
 }
 
-void key_handler_always(unsigned char key, int x, int y)
-{
-   if( !pGrid || !pParticles)
-      return;
+void display_data() {
    advance_one_frame(*pParticles, .0001);
    ++stepCount;
    printf("===================================================> step %d...\n", stepCount);
@@ -97,6 +97,15 @@ void key_handler_always(unsigned char key, int x, int y)
    glutPostRedisplay();
 }
 
+void timer_func(int value) {
+   advance_one_frame(*pParticles, .0001);
+   ++stepCount;
+   printf("===================================================> step %d...\n", stepCount);
+   pParticles->write_to_file("%s/frameparticles%04d", outputpath.c_str(), stepCount);
+   sprintf(frame_number, "frame %d", stepCount);
+   glutPostRedisplay();
+   glutTimerFunc(1,timer_func,1);
+}
 
 int main(int argc, char **argv)
 {
@@ -113,17 +122,14 @@ int main(int argc, char **argv)
    Gluvi::init("fluid simulation viewer woohoo", &argc, argv);
    pParticles->write_to_file("%s/frameparticles%04d", outputpath.c_str(), 0);
    stepCount = 0;
-
+   start = false;
    //glutKeyboardFunc(key_handler);
-   glutKeyboardFunc(key_handler_always);
-
+   glutKeyboardFunc(key_handler);
+   glutTimerFunc(1,timer_func,1);
+   //glutDisplayFunc(display_data);
    float bottom, left, height;
    set_view(bottom, left, height);
-   bottom = 0;
-   left = 0;
-   height = 1.53;
-   std::cout << bottom << std::endl;
-   std::cout << height << std::endl;
+   
    Gluvi::PanZoom2D cam(bottom, left, height);
    Gluvi::camera=&cam;
    

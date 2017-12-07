@@ -17,6 +17,7 @@ struct Particles{
 
    //Grid &grid;
    std::vector<Particle*> particles;
+   Particle* hapti_particle;
    int np;
 
    //Particles(Grid &grid_, SimulationType simType_)

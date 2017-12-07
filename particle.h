@@ -19,10 +19,12 @@ struct Particle{
    float density;
    Vec2f force;
    std::vector<Particle*> neighbors;
-   Particle(Vec2f x, Vec2f u, float density) {
+   bool hapti_particle;
+   Particle(Vec2f x, Vec2f u, bool hapti_particle) {
       this->x = x;
       this->u = u;
-      this->density = density;
+      this->density = 0;
+      this->hapti_particle = hapti_particle;
    };
 };
 

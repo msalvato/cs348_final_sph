@@ -17,16 +17,17 @@
 using namespace std;
 
 Particles::Particles(float width, float height, int resolution, int x_particles, int y_particles) {
-   float start_x = 1.14;
+   float start_x = 1.;
    float start_y = .1;
    float space_x = .0204;
    float space_y = .016;
 
    for (int i = 0; i < y_particles; i ++ ){
-      for (int j = 0; j < x_particles; j++){
+      for (int j = 0; j < x_particles*1.5; j++){
          add_particle(Vec2f(start_x + space_x*j, start_y + space_y*i), Vec2f(0,0));
       }
    }
+   hapti_particle = new Particle(Vec2f(-1,-1), Vec2f(0,0), false);
 }
 
 void Particles::
@@ -39,17 +40,26 @@ add_particle(const Vec2f &px, const Vec2f &pu)
 
 void Particles::
 update_sph(float dt) {
-   for (Particle* p : particles){
+   //#pragma omp parallel for
+   //for (Particle* p : particles){
+   for (int i = 0; i < particles.size(); i++){
+      Particle* p = particles[i];
       findNeighbors(p, particles);
       particleDensity(p);
    }
-   for (Particle* p : particles){
+   //#pragma omp parallel for
+   //for (Particle* p : particles){
+   for (int i = 0; i < particles.size(); i++){
+      Particle* p = particles[i];
       p->force = particlePressureForce(p);
       p->force += particleViscosityForce(p);
       p->force += particleGravityForce(p);
       // mass
    }
-   for (Particle *p : particles) {
+   //#pragma omp parallel for
+   //for (Particle* p : particles){
+   for (int i = 0; i < particles.size(); i++){
+      Particle* p = particles[i];
       p->u += p->force*dt/p->density;
       p->x += p->u*dt;
       if (p->x[0] >= 3) {
