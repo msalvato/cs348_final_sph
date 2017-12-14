@@ -56,6 +56,7 @@ update_sph(float dt) {
       p->force = particlePressureForce(p);
       p->force += particleViscosityForce(p);
       p->force += particleGravityForce(p);
+      p->force += particleSurfaceTension(p);
       // mass
    }
    //#pragma omp parallel for
