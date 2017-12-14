@@ -9,7 +9,6 @@
 #define PARTICLE_H
 
 #include <vector>
-#include "grid.h"
 #include "vec2.h"
 
 struct Particle{

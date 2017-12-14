@@ -66,6 +66,7 @@ void display(void)
 {
    glDisable(GL_LIGHTING);
    glColor3f(1, 1, 1);
+   glPointSize(5);
    glBegin(GL_POINTS);
    for(unsigned int i=0; i<x.size(); ++i)
       glVertex2fv(x[i].v);

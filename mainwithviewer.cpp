@@ -16,13 +16,15 @@
 using namespace std;
 
 char frame_number[100]="frame 0";
-Grid* pGrid;
 Particles* pParticles;
 std::string outputpath;
 double frametime = .0001;
 int stepCount;
 bool start;
 bool mouse_down = false;
+float window_width = 3;
+float window_height = 1.5;
+float resolution = 600;
 
 
 void set_view(float &bottom, float &left, float &height)
@@ -78,12 +80,12 @@ struct ScreenShotButton : public Gluvi::Button{
 
 void key_handler(unsigned char key, int x, int y)
 {
-   if( !pGrid || !pParticles)
+   if(!pParticles)
       return;
    switch(key){
       case ' ':
          start = !start;
-         advance_one_frame(*pParticles, .0001);
+         advance_one_frame(*pParticles, frametime);
          ++stepCount;
          printf("===================================================> step %d...\n", stepCount);
          pParticles->write_to_file("%s/frameparticles%04d", outputpath.c_str(), stepCount);
@@ -97,7 +99,7 @@ void key_handler(unsigned char key, int x, int y)
 }
 
 void display_data() {
-   advance_one_frame(*pParticles, .0001);
+   advance_one_frame(*pParticles, frametime);
    ++stepCount;
    printf("===================================================> step %d...\n", stepCount);
    pParticles->write_to_file("%s/frameparticles%04d", outputpath.c_str(), stepCount);
@@ -106,10 +108,10 @@ void display_data() {
 }
 
 void timer_func(int value) {
-   advance_one_frame(*pParticles, .0001);
+   advance_one_frame(*pParticles, frametime);
    ++stepCount;
    //printf("===================================================> step %d...\n", stepCount);
-   //pParticles->write_to_file("%s/frameparticles%04d", outputpath.c_str(), stepCount);
+   pParticles->write_to_file("%s/frameparticles%04d", outputpath.c_str(), stepCount);
    //sprintf(frame_number, "frame %d", stepCount);
    glutPostRedisplay();
    glutTimerFunc(1,timer_func,1);
@@ -118,8 +120,8 @@ void timer_func(int value) {
 void mouse_check(int button, int state, int x, int y){
    if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN)) {
       mouse_down = true;
-      pParticles->hapti_particle->x[0] = x/600.f;
-      pParticles->hapti_particle->x[1] = 1.5-y/600.f;
+      pParticles->hapti_particle->x[0] = x/resolution;
+      pParticles->hapti_particle->x[1] = window_height-y/resolution;
    }
    if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP)) {
       mouse_down = false;
@@ -129,24 +131,21 @@ void mouse_check(int button, int state, int x, int y){
 }
 
 void motion_check(int x, int y){
-   pParticles->hapti_particle->u[0] = 10000*(x/600.f - pParticles->hapti_particle->x[0]);
-   pParticles->hapti_particle->u[1] = 10000*(1.5-y/600.f - pParticles->hapti_particle->x[1]);
-   pParticles->hapti_particle->x[0] = x/600.f;
-   pParticles->hapti_particle->x[1] = 1.5-y/600.f;
+   pParticles->hapti_particle->u[0] = (1/frametime)*(x/resolution - pParticles->hapti_particle->x[0]);
+   pParticles->hapti_particle->u[1] = (1/frametime)*(1.5-y/resolution - pParticles->hapti_particle->x[1]);
+   pParticles->hapti_particle->x[0] = x/resolution;
+   pParticles->hapti_particle->x[1] = window_height-y/resolution;
 }
 
 int main(int argc, char **argv)
 {
-   float gravity = 9.8;
-   pGrid = new Grid(gravity, 10, 10, 1);
-   
    outputpath=".";
 
    if(argc>1) outputpath=argv[1];
    else printf("using default output path...\n");
    printf("Output sent to %s\n", outputpath.c_str() );
 
-   pParticles = new Particles(3, 1.5, 400, 35, 70);
+   pParticles = new Particles(window_width, window_height, 1, 0, 2, 1.4);
    Gluvi::init("fluid simulation viewer woohoo", &argc, argv);
    pParticles->write_to_file("%s/frameparticles%04d", outputpath.c_str(), 0);
    stepCount = 0;

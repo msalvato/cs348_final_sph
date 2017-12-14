@@ -2,7 +2,7 @@
 
 DEPEND = g++
 CC = g++ -Wall 
-RELEASE_FLAGS = -O3 -fopenmp -DNDEBUG -std=gnu++11
+RELEASE_FLAGS = -O3 -DNDEBUG -std=gnu++11
 DEBUG_FLAGS = -g -std=gnu++11
 LINK = g++
 LINK_LIBS = -lm

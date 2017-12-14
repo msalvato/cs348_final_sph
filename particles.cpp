@@ -12,18 +12,18 @@
 #include "particles.h"
 #include "particle.h"
 #include "util.h"
-#include "kernels.cpp"
+#include "sph_calc.cpp"
 
 using namespace std;
 
-Particles::Particles(float width, float height, int resolution, int x_particles, int y_particles) {
-   float start_x = 1.;
-   float start_y = .1;
-   float space_x = .0204;
-   float space_y = .016;
+Particles::Particles(float width, float height, float start_x, float start_y, float end_x, float end_y) {
+   float space_x = .02;
+   float space_y = .02;
+   int y_particles = (end_y - start_y)/space_y;
+   int x_particles = (end_x - start_x)/space_x;
 
    for (int i = 0; i < y_particles; i ++ ){
-      for (int j = 0; j < x_particles*1.5; j++){
+      for (int j = 0; j < x_particles; j++){
          add_particle(Vec2f(start_x + space_x*j, start_y + space_y*i), Vec2f(0,0), false);
       }
    }

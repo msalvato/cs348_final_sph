@@ -9,23 +9,16 @@
 #define PARTICLES_H
 
 #include <vector>
-#include "grid.h"
 #include "vec2.h"
 #include "particle.h"
 
 struct Particles{
 
-   //Grid &grid;
    std::vector<Particle*> particles;
    Particle* hapti_particle;
    int np;
 
-   //Particles(Grid &grid_, SimulationType simType_)
-   //   :grid(grid_), np(0),
-   //    sum(grid_.pressure.nx+1, grid_.pressure.ny+1), simType( simType_ )
-   //{}
-
-   Particles(float width, float height, int resolution, int x_particles, int y_particles);
+   Particles(float width, float height, float start_x, float start_y, float end_x, float end_y);
 
    void add_particle(const Vec2f &px, const Vec2f &pu, const bool hapti_particle);
    void write_to_file(const char *filename_format, ...);
@@ -34,7 +27,6 @@ struct Particles{
    private:
    template<class T> void accumulate(T &accum, float q, int i, int j, float fx, float fy);
    template<class T> void affineFix(T &accum, Vec2f c, int i, int j, float fx, float fy);
-   Vec2f computeC(Array2f &ufield, int i, int j, float fx, float fy);
 };
 
 #endif
